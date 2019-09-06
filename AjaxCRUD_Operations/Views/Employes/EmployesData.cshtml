@@ -1,0 +1,107 @@
+﻿<section style="margin:3rem 0px;">
+    <div class="row">
+        <div class="col-md-12">
+            <button class="btn btn-lg btn-info" onclick="return GetEmployeeForm()">Add Employee</button>
+        </div>
+    </div>
+    <hr />
+    <div class="row">
+        <div class="col-md-12">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped" id="tblEmployees">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Salary</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+
+    $(function () {
+
+        loadEmployesData();
+
+    })
+
+    let loadEmployesData = function () {
+
+        $.ajax({
+            url: '/Employes/LoadEmployesData',
+            method: 'GET'
+        }).done(function (data) {
+
+            const dataObj = {
+                data: data,
+                retrieve: true,
+                ordering:false,
+                columns: [
+                    { 'data': 'ID' },
+                    { 'data': 'Name' },
+                    { 'data': 'Age' },
+                    { 'data': 'Salary' },
+                    {
+                        'data': 'ID',
+                        'ordering': false,
+                        'sorting': false,
+                        'render': function (id) {
+
+                            let btns = '';
+
+                            btns += `<a href="javascript:;" onclick="return deleteEmp(${id})" title="Delete Employee"><i class="text-danger glyphicon glyphicon-trash"></i></a>`;
+
+                            return btns;
+
+                        }
+                    }
+                ]
+            }
+
+
+            $('#tblEmployees').dataTable().fnDestroy();
+            $('#tblEmployees').DataTable(dataObj);
+
+        }).fail(function (response, status, xhr) {
+            toastr.error(xhr.responseText);
+        });
+
+    }
+
+
+    let GetEmployeeForm = function () {
+
+        $.ajax({
+            url: '/Employes/EmployeForm',
+            method: 'GET'
+        }).done(function (data) {
+
+            $('#modal .modal-title').text('Add Employee');
+            $('#modal .modal-body').html(data);
+
+            $('#modal').modal('show');
+        });
+    }
+
+
+    let deleteEmp = function (id) {
+
+        bootbox.confirm({
+            size: "small",
+            message: "Are you sure?",
+            callback: function (result) {
+
+            }
+        })
+
+    }
+
+</script>

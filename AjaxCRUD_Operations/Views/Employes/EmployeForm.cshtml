@@ -1,0 +1,129 @@
+﻿<div class="row">
+    <div class="col-md-12">
+        <form id="formEmployee">
+            <div class="form-group">
+                <label>Departments</label>
+                <select name="deps" class="form-control" id="ddlDeps"></select>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" name="name" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" name="age" class="form-control" min="0" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Salary</label>
+                    <input type="number" name="salary" class="form-control" min="0" />
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" name="phone" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Gender</label>
+                <br />
+                <strong>Male </strong> <input type="radio" name="gender" checked />
+                <strong>Female </strong> <input type="radio" name="gender" />
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                <textarea name="address" class="form-control"></textarea>
+            </div>
+            <input type="hidden" id="employeeID" name="employeeID" />
+            <div class="form-group">
+                <button type="submit" class="btn btn-info"> Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jqueryval")
+
+<script>
+    $(function () {
+        getDepratment();
+    })
+
+    let getDepratment = function () {
+
+        $.ajax({
+            url: '/Departments/GetDepartments',
+            method: 'GET'
+        }).done(function (data) {
+            let options = '<option value=""> -- select option -- </option>';
+
+            $.each(data, function (i, item) {
+                options += `<option value='${item.ID}'>${item.Name} </option> `;
+            });
+
+            $('#ddlDeps').html(options);
+
+        });
+
+    }
+
+
+
+
+    $('#formEmployee').validate({
+        rules: {
+            name: {
+                required: true
+            },
+            phone: {
+                required: true
+            },
+            age: {
+                required: true
+            },
+            salary: {
+                required: true
+            },
+            deps: {
+                valueNotEquals: "",
+            }
+        },
+        submitHandler: function (form) {
+
+            const empObj = {
+                Name: $('#formEmployee input[name="name"]').val(),
+                Age: $('#formEmployee input[name="age"]').val(),
+                Phone: $('#formEmployee input[name="phone"]').val(),
+                Address: $('#formEmployee input[name="address"]').val(),
+                Salary: $('#formEmployee input[name="salary"]').val(),
+                Gender: 'Male',
+                DepartmentID: $('#formEmployee #ddlDeps').find(':selected').val()
+            };
+
+            $.ajax({
+                url: '/Employes/AddEmployee',
+                method: 'POST',
+                data: empObj
+            }).done(function (response) {
+
+                if (response.add) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        loadEmployesData();
+
+                        $('#modal').modal('hide');
+                    } else {
+                        toastr.error(response.message);
+                    }
+                }
+            });
+        }
+
+    });
+
+
+    $.validator.addMethod("valueNotEquals", function (value, element, arg) {
+        return arg != value;
+    }, "please select department.");
+
+</script>
